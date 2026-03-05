@@ -1,0 +1,22 @@
+name: irrigation
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - geopandas
+  - rasterio
+  - xarray
+  - rioxarray
+  - rasterstats
+  - cartopy
+  - pip
+  - pip:
+    - earthengine-api
+    - geemap
+    - streamlit
+    - streamlit-folium
+    - scikit-learn
+    - spyndex
+    - folium
+    - lightgbm
