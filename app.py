@@ -134,7 +134,7 @@ m = folium.Map(location=[center_lat, center_lon], zoom_start=6)
 
 ndvi_vis = {"min": 0, "max": 0.8, "palette": ["white", "darkgreen"]}
 contrast_vis = {"min": -0.2, "max": 0.6, "palette": ["brown", "white", "blue"]}
-irrigation_vis = {"min": 0, "max": 1, "palette": ["transparent", "#2196F3"]}
+irrigation_vis = {"min": 0, "max": 1, "palette": ["white", "#2196F3"]}
 
 layers = {
     "Dry Season NDVI": (ndvi_dry, ndvi_vis),
