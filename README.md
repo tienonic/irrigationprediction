@@ -1,25 +1,53 @@
-# Irrigation Expansion Tracker
+# Irrigation & Groundwater Monitor
 
-A web dashboard for detecting and visualizing irrigated agricultural land worldwide using satellite imagery from Google Earth Engine.
+Detect irrigated agricultural land from satellite imagery using Google Earth Engine. Built to help identify potential unauthorized groundwater extraction in regulated areas.
+
+## Why This Exists
+
+In regions like Egypt's Nile Delta, California's Central Valley, and India's Punjab, groundwater pumping is regulated or banned — but enforcement is nearly impossible from the ground. Wells are invisible, but their effect isn't: **irrigated fields stay green through the dry season when they shouldn't.**
+
+This tool detects that signal from space using free Sentinel-2 satellite imagery at 10m resolution.
 
 ## How It Works
 
-The tool uses **temporal NDVI contrast** from Sentinel-2 satellite imagery to distinguish irrigated land from rainfed agriculture:
+The tool uses **temporal NDVI contrast** from Sentinel-2 imagery:
 
-1. Computes median NDVI for wet and dry seasons separately
+1. Computes median vegetation greenness (NDVI) for wet and dry seasons separately
 2. Irrigated fields maintain high NDVI in the dry season (sustained by pumped water)
-3. Rainfed fields show low dry-season NDVI and high wet-dry contrast (they go brown)
-4. A pixel is classified as irrigated when dry NDVI exceeds a threshold AND the wet-dry contrast is below a threshold
+3. Rainfed fields go brown in dry season (high seasonal contrast)
+4. A pixel is classified as irrigated when dry NDVI exceeds a threshold AND the wet-dry contrast stays low
 
-All satellite processing runs server-side on Google Earth Engine — no local data downloads required.
+All processing runs server-side on Google Earth Engine — no data downloads required.
 
 ## Features
 
-- **5 preset regions**: India-Pakistan, East Africa, Central Asia, Nile Delta, California Central Valley
-- **Custom bounding box** support for any region worldwide
-- **Adjustable parameters**: year (2017-2025), wet/dry season months, NDVI thresholds, cloud cover filter
-- **4 map layers**: Irrigation proxy, dry-season NDVI, wet-season NDVI, wet-dry contrast
-- **Interactive map** with layer toggling via Folium + Streamlit
+- **5 preset regions** with tuned defaults: Nile Delta, India-Pakistan, East Africa, Central Asia, California
+- **Custom bounding box** for any region worldwide
+- **Year-over-year comparison**: change detection map showing irrigation expansion, loss, and stable areas
+- **Area statistics**: irrigated area in km², hectares, and acres — with delta and % change in comparison mode
+- **Region-specific tips** explaining the water governance context for each area
+- **Adjustable parameters**: season months, NDVI thresholds, cloud cover filter
+- **Interactive map** with multiple layers via Folium + Streamlit
+
+### Map Layers
+
+| Layer | What it shows | How to read it |
+|---|---|---|
+| Irrigation Proxy | Pixels classified as irrigated | Blue = irrigated, light = not |
+| Dry Season NDVI | Vegetation greenness in dry months | Green patches in dry season = likely pumped water |
+| Wet Season NDVI | Vegetation greenness in wet months | Baseline — everything is green |
+| Wet-Dry Contrast | Seasonal NDVI difference | Brown = stable year-round (irrigated or forest), blue = seasonal (rainfed) |
+| Change Map | Year-over-year irrigation change | Green = new, red = lost, blue = stable |
+
+### Tips
+
+- **Start with the Nile Delta** — it's small, loads fast, and the irrigation signal is very clear against the desert
+- **Desert-edge fields** are the strongest signal for unauthorized wells — green patches in otherwise barren land
+- **Lower the dry NDVI threshold** (e.g., 0.15) in arid regions where even irrigated land has modest greenness
+- **Raise the max contrast** (e.g., 0.4) in tropical regions with seasonal irrigation variation
+- **Adjust season months** to match local climate — defaults are tuned per region but may need refinement
+- **Year-over-year**: compare 5+ year gaps for clearer expansion trends (e.g., 2018 vs 2024)
+- **Forests** also stay green year-round — focus analysis on known agricultural zones
 
 ## Prerequisites
 
@@ -47,13 +75,8 @@ pip install earthengine-api geemap streamlit streamlit-folium scikit-learn spynd
 You need a GCP project registered for Earth Engine. Replace `YOUR_PROJECT_ID` with your project ID.
 
 ```bash
-# Authenticate (use --no-launch-browser for headless/remote machines)
 gcloud auth application-default login --no-launch-browser
-
-# Set the Earth Engine project
 earthengine set_project YOUR_PROJECT_ID
-
-# Set the quota project
 gcloud auth application-default set-quota-project YOUR_PROJECT_ID
 
 # Verify
@@ -63,41 +86,32 @@ python -c "import ee; ee.Initialize(project='YOUR_PROJECT_ID'); print('Connected
 ## Usage
 
 ```bash
+./dev.sh
+# or manually:
 conda activate irrigation
 streamlit run app.py --server.address 0.0.0.0
 ```
 
-Open `http://localhost:8501` in your browser (or the machine's IP if running remotely).
+Open `http://localhost:8501` in your browser.
 
 ### Controls
 
 | Parameter | Description | Default |
 |---|---|---|
-| Region | Preset region or custom bounding box | India-Pakistan |
-| Year | Analysis year | 2024 |
-| Wet season months | Month range for wet season composite | Jul-Sep |
-| Dry season months | Month range for dry season composite | Dec-Feb |
-| Dry NDVI threshold | Minimum dry-season NDVI to classify as irrigated | 0.25 |
-| Max wet-dry contrast | Maximum NDVI contrast to classify as irrigated | 0.30 |
-| Max cloud cover % | Filter out images with higher cloud percentage | 20% |
-
-## Project Structure
-
-```
-agdev/
-  app.py                    # Streamlit application
-  README.md                 # This file
-  requirements.txt          # Python (pip) dependencies
-  environment.yml           # Full conda environment spec
-  irrigation-frameworks.md  # Background research on detection methods
-```
+| Mode | Single Year analysis or Year-over-Year comparison | Single Year |
+| Region | Preset region or custom bounding box | Nile Delta |
+| Year | Analysis year (or two years for comparison) | 2024 |
+| Wet/Dry season months | Month ranges (auto-tuned per region) | Varies |
+| Dry NDVI threshold | Minimum dry-season NDVI to classify as irrigated | 0.20-0.25 |
+| Max wet-dry contrast | Maximum NDVI contrast to classify as irrigated | 0.25-0.30 |
+| Max cloud cover % | Filter out cloudy satellite images | 20% |
 
 ## Limitations
 
-- **Evergreen forests** also show low seasonal contrast and may be misclassified as irrigated. Production use should incorporate a land cover mask (e.g., ESA WorldCover).
+- **Evergreen forests** show low seasonal contrast and may be misclassified as irrigated. A land cover mask (e.g., ESA WorldCover) would help in production use.
 - **Threshold-based** classification — a trained ML model (Random Forest, LightGBM) on labeled data would be more accurate.
 - **Cloud cover** in wet tropical regions can reduce composite quality and introduce artifacts.
-- **Temporal resolution** depends on Sentinel-2 revisit frequency (5 days) and cloud filtering — sparse data in cloudy regions.
+- **Resolution** is limited to Sentinel-2's 10m pixels — individual wells are not visible, but their effect on fields is.
 
 ## Data Sources
 
