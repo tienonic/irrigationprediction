@@ -1,4 +1,4 @@
-# Irrigation Expansion Tracking — Framework Options
+# Irrigation Expansion Tracking: Framework Options
 
 ## The Core Insight
 
@@ -11,7 +11,7 @@ Irrigated fields stay green in dry season; rainfed fields don't. A temporal NDVI
 **What:** Google Earth Engine does all satellite processing in Google's cloud (free). geemap gives a Pythonic interface. Streamlit wraps it into a web dashboard you access from Windows.
 
 **Why it fits:**
-- Mac mini does almost nothing — GEE processes petabytes of imagery server-side
+- Mac mini does almost nothing: GEE processes petabytes of imagery server-side
 - Streamlit serves on `localhost:8501`, accessible from Windows via Tailscale (`http://100.104.51.108:8501`)
 - geemap has built-in split-panel maps, time sliders, and layer controls
 - Largest community, most tutorials, most examples for exactly this kind of work
@@ -34,7 +34,7 @@ pip install earthengine-api geemap streamlit streamlit-folium scikit-learn spynd
 **Cost:** Free (GEE is free for research/non-commercial use)
 
 **Docs:**
-- geemap: https://geemap.org (excellent — 300+ examples)
+- geemap: https://geemap.org (excellent: 300+ examples)
 - Streamlit: https://docs.streamlit.io
 - GEE Python: https://developers.google.com/earth-engine/guides/python_install
 
@@ -49,7 +49,7 @@ pip install earthengine-api geemap streamlit streamlit-folium scikit-learn spynd
 **Why it fits:**
 - JupyterLab runs on Mac mini, access from Windows browser via `http://100.104.51.108:8888`
 - geemap renders full interactive maps inside notebook cells (zoom, pan, layers, inspector)
-- Perfect for prototyping — test different thresholds, seasons, regions interactively
+- Perfect for prototyping: test different thresholds, seasons, regions interactively
 - Easy to mix code, maps, charts, and narrative in one document
 - Can export notebooks as reports
 
@@ -62,10 +62,10 @@ pip install earthengine-api geemap spyndex rasterstats
 ```
 
 **What you build:** A series of notebooks:
-1. `01_explore_ndvi.ipynb` — visualize wet/dry NDVI for sample regions
-2. `02_irrigation_proxy.ipynb` — threshold-based classification, compare to FAO ground truth
-3. `03_temporal_expansion.ipynb` — year-over-year change detection, 2016-2025
-4. `04_validation.ipynb` — cross-validate against IWMI/India census data
+1. `01_explore_ndvi.ipynb`: visualize wet/dry NDVI for sample regions
+2. `02_irrigation_proxy.ipynb`: threshold-based classification, compare to FAO ground truth
+3. `03_temporal_expansion.ipynb`: year-over-year change detection, 2016-2025
+4. `04_validation.ipynb`: cross-validate against IWMI/India census data
 
 **Cost:** Free
 
@@ -82,11 +82,11 @@ pip install earthengine-api geemap spyndex rasterstats
 **What:** Microsoft's Planetary Computer provides free access to the same satellite data (Sentinel-2, Landsat, MODIS) via STAC API, without needing a Google account. Process locally with xarray, visualize with hvPlot/Panel.
 
 **Why it fits:**
-- No GEE signup needed — data is accessed via open STAC protocol
+- No GEE signup needed: data is accessed via open STAC protocol
 - xarray handles time-series rasters natively (e.g., monthly NDVI composites as a 3D array)
 - hvPlot generates interactive Bokeh maps from xarray objects in one line
 - Panel (same ecosystem) can turn any hvPlot into a deployable dashboard
-- More portable — not locked to any cloud provider
+- More portable: not locked to any cloud provider
 
 **Stack:**
 ```
@@ -116,7 +116,7 @@ ndvi = (ds.B08 - ds.B04) / (ds.B08 + ds.B04)
 ndvi.mean("time").hvplot.image(geo=True, cmap="YlGn", tiles="OSM")
 ```
 
-**Cost:** Free (Planetary Computer is free, data download is free). Local compute costs depend on region size — for a country, ~2-4 GB RAM. For global, you'd need to tile.
+**Cost:** Free (Planetary Computer is free, data download is free). Local compute costs depend on region size: for a country, ~2-4 GB RAM. For global, you'd need to tile.
 
 **Docs:**
 - Planetary Computer: https://planetarycomputer.microsoft.com/docs/overview/about
@@ -133,7 +133,7 @@ ndvi.mean("time").hvplot.image(geo=True, cmap="YlGn", tiles="OSM")
 **What:** Leafmap is a general-purpose geospatial mapping library that works with GEE, local files, COGs (Cloud-Optimized GeoTIFFs), and any XYZ tile service. Solara turns it into a reactive web app without needing Streamlit.
 
 **Why it fits:**
-- Works with or without GEE — can use downloaded GeoTIFFs, STAC, WMS, etc.
+- Works with or without GEE: can use downloaded GeoTIFFs, STAC, WMS, etc.
 - Solara is lighter than Streamlit and designed for Jupyter widget-based apps
 - Can display split maps (before/after), time sliders, drawing tools
 - Good for building a tool that works fully offline after initial data download
@@ -170,7 +170,7 @@ pip install earthengine-api  # optional, if using GEE as a data source
 **What:** QGIS is the open-source desktop GIS. It has a built-in Temporal Controller for animating time-series data, a GEE plugin for direct satellite access, and a full Python console for scripting.
 
 **Why it fits:**
-- Most powerful visualization for geospatial data — full cartographic control
+- Provides full cartographic control for geospatial visualization
 - Temporal Controller can animate irrigation expansion year by year
 - GEE plugin (by Gennadii Donchyts) lets you load GEE layers directly into QGIS
 - Python console lets you script everything (PyQGIS)
@@ -201,7 +201,7 @@ Install GEE plugin: QGIS > Plugins > Manage and Install Plugins > search "Google
 - Temporal Controller: https://docs.qgis.org/3.34/en/docs/user_manual/map_views/map_view.html#temporal-control
 - GEE QGIS plugin: https://gee-community.github.io/qgis-earthengine-plugin/
 
-**Limitations:** Requires a display — you'd need VNC or macOS Screen Sharing from Windows, which adds latency. Not great for a headless workflow. But for cartographic quality and temporal animation, nothing else comes close.
+**Limitations:** Requires a display: you'd need VNC or macOS Screen Sharing from Windows, which adds latency. Not great for a headless workflow. But for cartographic quality and temporal animation, nothing else comes close.
 
 ---
 
